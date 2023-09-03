@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container text-center mt-5">
+    <h1 class="display-4">Tic-Tac-Toe</h1>
+     <!-- New form to set play mode -->
+     <form method="post" action="{{ url_for('set_play_mode') }}" class="mb-4">
+        <label for="play_mode">Choose Play Mode:</label>
+        <select id="play_mode" name="play_mode">
+            <option value="human">Human vs Human</option>
+            <option value="computer">Human vs Computer</option>
+        </select>
+        <button type="submit">Set Mode</button>
+    </form>
+
+    <div class="mt-5">
+    <table class="mx-auto">
+        {% for row in range(3) %}
+            <tr>
+                {% for col in range(3) %}
+                    <td>
+                        <form class="move-form" method="post" action="{{ url_for('make_move', row=row, col=col) }}">
+                            <button type="submit" class="btn btn-lg btn-outline-secondary" {% if board[row][col] != " " or current_player is none %}disabled{% endif %}>
+                                {{ board[row][col] }}
+                            </button>
+                        </form>
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    </div>
+    
+   
+        {% if winner == 'X' or winner == 'O' %}
+        <p>Congratulations, {{ winner|capitalize }} wins!</p>
+        {% elif current_player is none %}
+        <p>Game over!</p>
+        {% else %}
+        <p>Current player: {{ current_player }}</p>
+        {% endif %}
+
+        {% if current_user.is_authenticated %}
+        <p>Welcome, {{ current_user.username }}</p>
+        <form action="{{ url_for('logout') }}" method="POST">
+            <input type="submit" value="Logout">
+        </form>
+        <form method="post" action="{{ url_for('reset_game') }}">
+            <button type="submit">Reset Game</button>
+        </form>
+        {% else %}
+        <!-- <p>You need to log in or play as guest to initialize the game.</p> -->
+        <a href="{{ url_for('register') }}" class="register-button">Register</a>
+        <form action="{{ url_for('login') }}" method="GET">
+            <input type="submit" value="Login">
+        </form>
+        {% endif %}
+        {% if message %}
+        <p>{{ message }}</p>
+        {% endif %}
+
+        <a href="{{ url_for('forgot') }}">Forgot Password?</a>
+
+    
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll(".move-form");
+    forms.forEach(function (form) {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: "POST",
+                body: formData,
+            })
+            .then(function () {
+                debugger;
+                location.reload();  // Refresh the page after making a move
+            })
+            .catch(function (error) {
+                console.error("Error:", error);
+                // Handle the error if needed
+            });
+        });
+    });
+});
+
+
+    </script>
+    </div>
+</body>
+</html>
